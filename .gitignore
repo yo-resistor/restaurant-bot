@@ -1,20 +1,43 @@
-# Python
+# Byte-compiled / optimized / cache
 __pycache__/
 *.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Distribution / packaging
+build/
+dist/
 *.egg-info/
+.eggs/
+
+# Virtual environments
 .venv/
 venv/
+env/
+ENV/
 
 # Environment / secrets
 .env
+.env.*
+!.env.example
 
-# Local chat-history database
+# Local chat-history database (SQLiteSession)
 *.db
 *.db-shm
 *.db-wal
-
-# OS
-.DS_Store
+*.sqlite
+*.sqlite3
 
 # uv
 uv.lock
+
+# Editors / IDEs
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
