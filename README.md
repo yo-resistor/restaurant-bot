@@ -1,4 +1,4 @@
-# 과제 1 — Restaurant Bot
+# Restaurant Bot
 
 A multi-agent restaurant bot using the **OpenAI Agents SDK** `handoff` feature,
 with input/output **guardrails**. A Triage agent routes each request to one of
