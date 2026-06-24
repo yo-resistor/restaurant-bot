@@ -13,16 +13,23 @@ from models import RestaurantContext, InputGuardRailOutput, HandoffData
 from my_agent.menu_agent import menu_agent
 from my_agent.order_agent import order_agent
 from my_agent.reservation_agent import reservation_agent
+from my_agent.complaints_agent import complaints_agent
 
 
 input_guardrail_agent = Agent(
     name="Input Guardrail Agent",
     instructions="""
-    Ensure the user's request is about our restaurant — the menu, ingredients,
-    allergies, placing a food order, or making a table reservation. Friendly small
-    talk (greetings, thanks) is fine, especially at the start of the conversation.
-    If the request is clearly off-topic (e.g. unrelated to dining at our
-    restaurant), return a reason for the tripwire.
+    Check the user's message on TWO things and report both:
+
+    1. is_off_topic — true if the message is NOT about our restaurant (the menu,
+       ingredients, allergies, ordering food, reservations, or a complaint about
+       their dining experience). Friendly small talk (greetings, thanks) is fine.
+       A guest complaining about bad food or rude staff is ON-topic.
+
+    2. is_inappropriate — true if the message uses profanity, hate speech,
+       harassment, or other abusive / inappropriate language.
+
+    Always give a short reason for any tripwire.
 """,
     output_type=InputGuardRailOutput,
 )
@@ -40,9 +47,11 @@ async def off_topic_guardrail(
         context=wrapper.context,
     )
 
+    triggered = result.final_output.is_off_topic or result.final_output.is_inappropriate
+
     return GuardrailFunctionOutput(
         output_info=result.final_output,
-        tripwire_triggered=result.final_output.is_off_topic,
+        tripwire_triggered=triggered,
     )
 
 
@@ -81,6 +90,12 @@ def dynamic_triage_agent_instructions(
     📅 RESERVATION AGENT — route here for:
     - Booking, changing, or cancelling a table
     - "I want to make a reservation", "Can I move my booking to 8pm?"
+
+    😟 COMPLAINTS AGENT — route here for:
+    - An unhappy guest complaining about their experience
+    - Bad food, rude staff, wrong/late order, dirty table, any dissatisfaction
+    - "The food was terrible", "The waiter was rude", "I want to complain"
+    - For complaints, briefly apologize first, then hand off.
 
     HOW TO HAND OFF:
     1. Understand the request. Ask ONE clarifying question only if it's unclear.
@@ -132,5 +147,6 @@ triage_agent = Agent(
         make_handoff(menu_agent),
         make_handoff(order_agent),
         make_handoff(reservation_agent),
+        make_handoff(complaints_agent),
     ],
 )

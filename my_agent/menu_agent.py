@@ -8,6 +8,7 @@ from tools import (
     find_allergen_free_dishes,
     AgentToolUsageLoggingHooks,
 )
+from output_guardrails import restaurant_output_guardrail
 
 
 def dynamic_menu_agent_instructions(
@@ -50,5 +51,6 @@ menu_agent = Agent(
         get_vegetarian_options,
         find_allergen_free_dishes,
     ],
+    output_guardrails=[restaurant_output_guardrail],
     hooks=AgentToolUsageLoggingHooks(),
 )

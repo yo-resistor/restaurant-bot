@@ -8,6 +8,7 @@ from tools import (
     modify_reservation,
     AgentToolUsageLoggingHooks,
 )
+from output_guardrails import restaurant_output_guardrail
 
 
 def dynamic_reservation_agent_instructions(
@@ -46,5 +47,6 @@ reservation_agent = Agent(
         cancel_reservation,
         modify_reservation,
     ],
+    output_guardrails=[restaurant_output_guardrail],
     hooks=AgentToolUsageLoggingHooks(),
 )

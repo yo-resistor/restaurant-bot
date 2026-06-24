@@ -4,7 +4,12 @@ dotenv.load_dotenv()
 from openai import OpenAI
 import asyncio
 import streamlit as st
-from agents import Runner, SQLiteSession, InputGuardrailTripwireTriggered
+from agents import (
+    Runner,
+    SQLiteSession,
+    InputGuardrailTripwireTriggered,
+    OutputGuardrailTripwireTriggered,
+)
 from models import RestaurantContext
 from my_agent.triage_agent import triage_agent
 
@@ -89,10 +94,25 @@ async def run_agent(message):
                         st.session_state["text_placeholder"] = text_placeholder
                         response = ""
 
-        except InputGuardrailTripwireTriggered:
-            st.write(
-                "Sorry, I can only help with our menu, orders, and reservations. 🙂"
-            )
+        except InputGuardrailTripwireTriggered as e:
+            # The agent may have already streamed some text before the guardrail
+            # tripped (they run concurrently), so erase it first.
+            st.session_state["text_placeholder"].empty()
+            st.warning("🛡️ [input guardrail 작동]")
+            info = e.guardrail_result.output.output_info
+            if getattr(info, "is_inappropriate", False):
+                st.write(
+                    "정중한 대화를 부탁드려요. 메뉴, 주문, 예약은 기꺼이 도와드릴게요. 🙂"
+                )
+            else:
+                st.write(
+                    "저는 레스토랑 관련 질문(메뉴, 주문, 예약)에 대해서만 도와드릴 수 있어요. 🙂"
+                )
+
+        except OutputGuardrailTripwireTriggered:
+            st.session_state["text_placeholder"].empty()
+            st.warning("🛡️ [output guardrail 작동]")
+            st.write("죄송하지만 그 답변은 보여드릴 수 없어요. 다시 도와드릴게요. 🙏")
 
 
 message = st.chat_input(

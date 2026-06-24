@@ -14,6 +14,13 @@ class RestaurantContext(BaseModel):
 
 class InputGuardRailOutput(BaseModel):
     is_off_topic: bool
+    is_inappropriate: bool
+    reason: str
+
+
+class OutputGuardRailOutput(BaseModel):
+    is_unprofessional: bool
+    exposes_internal_info: bool
     reason: str
 
 

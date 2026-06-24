@@ -340,6 +340,93 @@ def modify_reservation(
 
 
 # =============================================================================
+# COMPLAINTS HANDLING TOOLS
+# =============================================================================
+
+
+@function_tool
+def offer_discount(context: RestaurantContext, percentage: int, reason: str) -> str:
+    """
+    Offer the guest a discount on a future visit to make up for a bad experience.
+
+    Args:
+        percentage: Discount percentage to offer (e.g. 20, 50)
+        reason: Why the discount is being offered
+    """
+    code = f"SORRY-{random.randint(1000, 9999)}"
+    return f"""
+🎟️ Discount offered
+💸 {percentage}% off your next visit
+🔑 Code: {code}
+📝 Reason: {reason}
+📧 Code also sent to: {context.email}
+    """.strip()
+
+
+@function_tool
+def issue_refund(context: RestaurantContext, amount: float, reason: str) -> str:
+    """
+    Issue a refund to the guest for an unsatisfactory order.
+
+    Args:
+        amount: Amount to refund
+        reason: Reason for the refund
+    """
+    refund_id = f"REF-{random.randint(100000, 999999)}"
+    return f"""
+✅ Refund issued
+🔗 Refund ID: {refund_id}
+💰 Amount: ${amount:.2f}
+📝 Reason: {reason}
+⏱️ Appears on your card in 3-5 business days
+    """.strip()
+
+
+@function_tool
+def schedule_manager_callback(
+    context: RestaurantContext, issue_summary: str, preferred_time: str
+) -> str:
+    """
+    Arrange for the restaurant manager to personally call the guest back.
+
+    Args:
+        issue_summary: Short summary of the complaint
+        preferred_time: When the guest would like to be called
+    """
+    ref = f"CALL-{random.randint(1000, 9999)}"
+    return f"""
+📞 Manager callback scheduled
+🔖 Reference: {ref}
+🗒️ Issue: {issue_summary}
+🕐 Preferred time: {preferred_time}
+👤 The manager will call {context.name} at {context.phone or context.email}
+    """.strip()
+
+
+@function_tool
+def escalate_complaint(
+    context: RestaurantContext, issue_summary: str, severity: str = "high"
+) -> str:
+    """
+    Escalate a serious complaint (e.g. food safety, illness, injury,
+    harassment) to senior management for urgent handling.
+
+    Args:
+        issue_summary: Summary of the serious issue
+        severity: Severity level (medium, high, critical)
+    """
+    ticket = f"ESC-{random.randint(10000, 99999)}"
+    follow_up = 1 if context.is_vip() else 24
+    return f"""
+🚨 Complaint escalated to senior management
+🎫 Ticket: {ticket}
+⚠️ Severity: {severity.upper()}
+📝 Issue: {issue_summary}
+🕐 A senior manager will follow up within {follow_up} hour(s)
+    """.strip()
+
+
+# =============================================================================
 # SHARED AGENT HOOKS (logged to the Streamlit sidebar)
 # =============================================================================
 
