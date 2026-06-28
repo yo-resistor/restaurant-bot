@@ -16,6 +16,32 @@ from my_agent.triage_agent import triage_agent
 client = OpenAI()
 
 st.title("🍝 Restaurant Bot")
+st.caption("메뉴 문의 · 주문 · 예약 · 불만 접수를 도와드려요.")
+
+with st.expander("ℹ️ 사용 방법"):
+    st.markdown(
+        """
+        - **메뉴 / 재료 / 알레르기** → "채식 메뉴 있어?"
+        - **주문** → "연어구이 주문할게"
+        - **예약** → "금요일 저녁 7시에 4명 예약하고 싶어"
+        - **불만** → "음식이 별로였어요"
+
+        아래 버튼으로 바로 시작할 수도 있어요.
+        레스토랑과 무관하거나 부적절한 말은 자동으로 차단돼요.
+        """
+    )
+
+# Quick-start buttons — clicking one sends an example prompt for the user.
+QUICK_PROMPTS = {
+    "🍽️ 메뉴 보기": "채식 메뉴 있어?",
+    "🧾 주문하기": "연어구이 주문할게",
+    "📅 예약하기": "금요일 저녁 7시에 4명 예약하고 싶어",
+    "😟 불만 접수": "음식이 너무 별로였어요",
+}
+quick_clicked = None
+for col, (label, prompt) in zip(st.columns(len(QUICK_PROMPTS)), QUICK_PROMPTS.items()):
+    if col.button(label, use_container_width=True):
+        quick_clicked = prompt
 
 guest_ctx = RestaurantContext(
     customer_id=1,
@@ -116,8 +142,8 @@ async def run_agent(message):
 
 
 message = st.chat_input(
-    "Ask about the menu, place an order, or book a table",
-)
+    "메뉴 문의, 주문, 예약 또는 불만을 입력하세요",
+) or quick_clicked
 
 if message:
     with st.chat_message("human"):
