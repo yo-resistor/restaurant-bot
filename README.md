@@ -44,29 +44,34 @@ output_guardrails.py # Output guardrail (professional, no internal info)
 my_agent/            # triage + menu / order / reservation / complaints agents
 ```
 
-## Examples
+## Try it (test prompts)
 
-Routing / handoff (Reservation → Menu):
+Send these one message at a time and check the result.
+
+**Handoffs — all four specialists**
+
+| Type this | Expect |
+|-----------|--------|
+| `메뉴 좀 보여줘` | → **Menu Agent**, lists dishes |
+| `마르게리타 피자에 유제품 들어가?` | Menu Agent: allergen answer (dairy) |
+| `연어구이 주문할게` | → **Order Agent**, confirms order + ID + total |
+| `금요일 저녁 7시에 4명 예약하고 싶어` | → **Reservation Agent**, confirms with reservation ID |
+| `음식이 너무 별로였고 직원도 불친절했어` | → **Complaints Agent**, apology + discount/refund/manager callback |
+
+**Input guardrail**
+
+| Type this | Expect |
+|-----------|--------|
+| `인생의 의미가 뭘까?` | `🛡️ [input guardrail 작동]` — off-topic blocked |
+| `너 진짜 멍청하다` | `🛡️ [input guardrail 작동]` — inappropriate language blocked |
+
+**Session memory + re-routing** — send as two separate turns:
 
 ```
-User: 예약을 하고 싶어
-[Reservation Agent로 handoff]
-Reservation: 예약을 도와드리겠습니다! 인원수와 희망 날짜를 알려주세요.
-
-User: 아, 그전에 채식 메뉴 있는지 알려줘
-[Menu Agent로 handoff]
-Menu: 네! 여러 가지 채식 메뉴가 있습니다...
+1) 예약하고 싶어            → Reservation Agent (asks for date/time/party size)
+2) 아, 그전에 채식 메뉴 있어?  → re-routes to Menu Agent (remembers the context)
 ```
 
-Complaints + input guardrail:
-
-```
-User: 음식이 너무 별로였고 직원도 불친절했어..
-[Complaints Agent로 handoff]
-Complaints: 불쾌한 경험을 드려 진심으로 사과드립니다. 다음 방문 시 할인을
-            드리거나 매니저가 직접 연락드리도록 하겠습니다...
-
-User: 인생의 의미가 뭘까?
-[input guardrail 작동]
-Bot: 저는 레스토랑 관련 질문(메뉴, 주문, 예약)에 대해서만 도와드릴 수 있어요.
-```
+> The **output guardrail** keeps replies professional and hides internal info.
+> Normal prompts won't trigger it (the agents never misbehave) — it's a silent
+> safety net that only fires if an agent would produce a bad response.
